@@ -90,3 +90,8 @@ npm install
 npm install @playwright/test ws express
 npx playwright install
 ```
+
+## 📄 Yasal Uyarı
+
+*Kullanım koşulları ve sorumluluk reddi için [DISCLAIMER.md](./DISCLAIMER.md) dosyasına bakınız.*
+
