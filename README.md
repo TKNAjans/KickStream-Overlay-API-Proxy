@@ -1,9 +1,12 @@
 # 🎥 KickStream Overlay & API Proxy
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy/releases)
-[![Documentation](https://img.shields.io/badge/📚-DOCUMENTATION-black?style=flat)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy#readme)
 [![Node.js Version](https://img.shields.io/badge/Node.js-18%2B-brightgreen)](https://nodejs.org/)
-
+[![Last Commit](https://img.shields.io/github/last-commit/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy/commits/main)
+[![Repo Size](https://img.shields.io/github/repo-size/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy)
+[![Contributors](https://img.shields.io/github/contributors/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy/graphs/contributors)
+[![Issues](https://img.shields.io/github/issues/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy/issues)
+[![Documentation](https://img.shields.io/badge/📚-DOCUMENTATION-black?style=flat)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy#readme)
 
 Kick.com için canlı sohbeti tarayıcıda gösteren, emote desteği olan, yayınlara entegre edilebilen bir chat overlay sistemi + proxy destekli API sunucusu.
 
