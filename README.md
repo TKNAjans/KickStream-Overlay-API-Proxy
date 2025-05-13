@@ -87,5 +87,6 @@ Tüm Kick API’lerini `Playwright` üzerinden çekerek CORS engelini aşar:
 1. Gerekli kurulum:
 ```bash
 npm install
+npm install @playwright/test ws express
 npx playwright install
 ```
