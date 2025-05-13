@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Kick Chat Viewer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    #chat {
+      height: 98vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+      overflow-y: auto;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE ve Edge */
+    }
+
+    #chat::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+
+    .msg {
+      margin: 4px 0;
+      word-break: break-word;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      display: grid;
+      grid-template-columns: auto auto 1fr; /* username, colon, content */
+      align-items: center; /* Dikey hizalama */
+    }
+
+    .msg-left {
+      transform: translateX(-50px); /* Soldan kayma */
+      animation: slideInLeft 0.5s ease-out forwards;
+    }
+
+    .msg-right {
+      transform: translateX(50px); /* Sağdan kayma */
+      animation: slideInRight 0.5s ease-out forwards;
+    }
+
+    @keyframes slideInLeft {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .username {
+      font-weight: bold;
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.9);
+      white-space: nowrap; /* Kullanıcı adı tek satırda kalır */
+    }
+
+    .colon {
+      margin: 0 4px;
+      white-space: nowrap;
+    }
+
+    .content {
+      word-break: break-word;
+    }
+
+    .content img {
+      height: 20px;
+      vertical-align: middle;
+    }
+
+    #error {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="error"></div>
+  <div id="chat"></div>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const errorDiv = document.getElementById("error");
+    const emoteCache = new Map();
+    let messageBuffer = [];
+    let lastUpdate = 0;
+    const UPDATE_INTERVAL = 100; // 100ms'de bir güncelle
+    const MAX_MESSAGES = 100; // Maksimum mesaj sayısı
+
+    // URL parametrelerini oku
+    const params = new URLSearchParams(window.location.search);
+    const fontSize = params.get("fontsize") || 16;
+    const animation = params.get("animation") || "left"; // Varsayılan: left
+    const currentUsername = window.location.pathname.split("/chat/")[1]?.split("?")[0] || "";
+    document.body.style.fontSize = `${fontSize}px`;
+
+    // Emote önbellekleme
+    function getEmote(emoteId) {
+      if (!emoteCache.has(emoteId)) {
+        emoteCache.set(emoteId, `<img src="https://files.kick.com/emotes/${emoteId}/fullsize" alt="emote" />`);
+      }
+      return emoteCache.get(emoteId);
+    }
+
+    // Mesaj oluşturma
+    function createMessageElement(msg, index) {
+      const div = document.createElement("div");
+      div.className = `msg msg-${animation}`; // Animasyon yönüne göre sınıf
+      div.style.animationDelay = `${index * 0.1}s`; // Sıralı animasyon gecikmesi
+
+      const usernameSpan = document.createElement("span");
+      usernameSpan.className = "username";
+      usernameSpan.style.color = msg.sender.identity?.color || "#fff";
+      usernameSpan.textContent = msg.sender.username;
+
+      const colonSpan = document.createElement("span");
+      colonSpan.className = "colon";
+      colonSpan.textContent = ":";
+
+      const contentSpan = document.createElement("span");
+      contentSpan.className = "content";
+      contentSpan.innerHTML = msg.content.replace(/\[emote:(\d+):[^\]]+\]/g, (match, emoteId) => {
+        return getEmote(emoteId);
+      });
+
+      div.appendChild(usernameSpan);
+      div.appendChild(colonSpan);
+      div.appendChild(contentSpan);
+
+      return div;
+    }
+
+    // Mesajları render etme
+    function renderMessages() {
+      const fragment = document.createDocumentFragment();
+      messageBuffer.forEach((msg, index) => {
+        const div = createMessageElement(msg, index);
+        fragment.appendChild(div);
+      });
+
+      chat.appendChild(fragment);
+
+      // Mesaj sınırı
+      while (chat.children.length > MAX_MESSAGES) {
+        chat.removeChild(chat.firstChild);
+      }
+
+      chat.scrollTop = chat.scrollHeight;
+      messageBuffer = [];
+    }
+
+    // Hata gösterme
+    function showError(message) {
+      errorDiv.textContent = message;
+      errorDiv.style.display = "block";
+      setTimeout(() => {
+        errorDiv.style.display = "none";
+      }, 5000);
+    }
+
+    // Sohbet alanını sıfırla
+    function resetChat() {
+      chat.innerHTML = "";
+      messageBuffer = [];
+      emoteCache.clear();
+    }
+
+    // WebSocket bağlantısı
+    function connectWebSocket() {
+      resetChat();
+
+      // HTTPS için wss:// kullan, yoksa ws://
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const ws = new WebSocket(`${wsProtocol}//${location.host}`);
+
+      ws.onopen = () => {
+        console.log("WebSocket bağlandı");
+        showError("Bağlantı kuruldu");
+        // Sunucuya username’i gönder
+        if (currentUsername) {
+          ws.send(JSON.stringify({ username: currentUsername }));
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.error("WebSocket hatası:", err);
+        showError("WebSocket bağlantı hatası");
+      };
+
+      ws.onclose = () => {
+        console.log("WebSocket kapandı, 5 saniye içinde yeniden bağlanıyor...");
+        showError("Bağlantı koptu, yeniden bağlanıyor...");
+        setTimeout(connectWebSocket, 5000);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          /* console.log("Gelen mesaj:", msg); */ // Mesajları logla
+          if (msg && msg.sender && msg.content) {
+            messageBuffer.push(msg);
+            const now = performance.now();
+            if (now - lastUpdate > UPDATE_INTERVAL) {
+              renderMessages();
+              lastUpdate = now;
+            }
+          }
+        } catch (e) {
+          //console.error("Mesaj parse hatası:", e);
+          showError("Geçersiz mesaj formatı");
+        }
+      };
+    }
+
+    // İlk bağlantıyı başlat
+    connectWebSocket();
+  </script>
+</body>
+</html>
