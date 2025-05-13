@@ -1,7 +1,7 @@
 # 🎥 KickStream Overlay & API Proxy
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 [![npm version](https://img.shields.io/npm/v/kick-chat-overlay.svg)](https://www.npmjs.com/package/kick-chat-overlay)
-[![release](https://img.shields.io/github/v/release/kullaniciAdi/projeAdi)](https://github.com/kullaniciAdi/projeAdi/releases)
+[![release](https://img.shields.io/github/v/release/TKNAjans/KickStream-Overlay-API-Proxy)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy/releases)
 [![Documentation](https://img.shields.io/badge/📚-DOCUMENTATION-black?style=flat)](https://github.com/TKNAjans/KickStream-Overlay-API-Proxy#readme)
 
 Kick.com için canlı sohbeti tarayıcıda gösteren, emote desteği olan, yayınlara entegre edilebilen bir chat overlay sistemi + proxy destekli API sunucusu.
